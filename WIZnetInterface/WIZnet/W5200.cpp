@@ -142,14 +142,6 @@ void WIZnet_Chip::reset()
     
     reg_wr<uint8_t>(MR, 1<<7);
 
-
-#if defined (TARGET_LPC1768)
-    uint8_t mac[6];
-    mbed_mac_address((char*)mac);
-#else
-    uint8_t mac[6] = {0x00,0x08,0xDC,0x00,0x00,0x00};
-#endif
-
     reg_wr_mac(SHAR, mac);
 }
 

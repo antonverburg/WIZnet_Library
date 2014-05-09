@@ -17,7 +17,6 @@
  */
 
 #pragma once
-
 #include "wiznet.h"
 
  /** Interface using Wiznet chip to connect to an IP-based network
@@ -42,7 +41,7 @@ public:
   * Initialize the interface and configure it to use DHCP (no connection at this point).
   * \return 0 on success, a negative number on failure
   */
-  int init(); //With DHCP
+  int init(uint8_t * mac); //With DHCP
 
   /** Initialize the interface with a static IP address.
   * Initialize the interface and configure it with the following static configuration (no connection at this point).
@@ -51,7 +50,7 @@ public:
   * \param gateway the gateway to use
   * \return 0 on success, a negative number on failure
   */
-  int init(const char* ip, const char* mask, const char* gateway);
+  int init(uint8_t * mac, const char* ip, const char* mask, const char* gateway);
 
   /** Connect
   * Bring the interface up, start DHCP if needed.

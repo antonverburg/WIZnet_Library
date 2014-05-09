@@ -141,13 +141,6 @@ void WIZnet_Chip::reset()
     reset_pin = 1;
     wait_ms(400); // 400ms (w5500)
 
-#if defined (TARGET_LPC1768) || (TARGET_LPC11U24)
-    uint8_t mac[6];
-    mbed_mac_address((char*)mac);
-#else
-    uint8_t mac[6] = {0x00,0x08,0xDC,0x00,0x00,0x00};
-#endif
-
 #if defined(USE_WIZ550IO_MAC)
     reg_rd_mac(SHAR, mac); // read the MAC address inside the module
 #endif

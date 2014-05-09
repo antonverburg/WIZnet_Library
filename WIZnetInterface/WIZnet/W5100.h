@@ -236,6 +236,7 @@ public:
     }
 
 protected:
+    uint8_t mac[6];
     uint32_t ip;
     uint32_t netmask;
     uint32_t gateway;

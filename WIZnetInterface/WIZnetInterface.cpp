@@ -31,16 +31,22 @@ WIZnetInterface::WIZnetInterface(SPI* spi, PinName cs, PinName reset) :
     ip_set = false;
 }
 
-int WIZnetInterface::init()
+int WIZnetInterface::init(uint8_t * mac)
 {
     dhcp = true;
+    //
+    for (int i =0; i < 6; i++) this->mac[i] = mac[i];
+    //
     reset();
     return 0;
 }
 
-int WIZnetInterface::init(const char* ip, const char* mask, const char* gateway)
+int WIZnetInterface::init(uint8_t * mac, const char* ip, const char* mask, const char* gateway)
 {
     dhcp = false;
+    //
+    for (int i =0; i < 6; i++) this->mac[i] = mac[i];
+    //
     this->ip = str_to_ip(ip);
     strcpy(ip_string, ip);
     ip_set = true;
@@ -97,7 +103,8 @@ char* WIZnetInterface::getMACAddress()
     uint8_t mac[6];
     reg_rd_mac(SHAR, mac);
     snprintf(mac_string, sizeof(mac_string), "%02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-    return mac_string;
+    return mac_string; 
+    
 }
 
 int WIZnetInterface::IPrenew(int timeout_ms)
