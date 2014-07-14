@@ -126,7 +126,15 @@ bool WIZnet_Chip::disconnect()
 
 bool WIZnet_Chip::is_connected(int socket)
 {
-    if (sreg<uint8_t>(socket, Sn_SR) == SOCK_ESTABLISHED) {
+    /*
+        if (sreg<uint8_t>(socket, Sn_SR) == SOCK_ESTABLISHED) {
+            return true;
+        }
+    */
+    uint8_t tmpSn_SR;
+    tmpSn_SR = sreg<uint8_t>(socket, Sn_SR);
+    // packet sending is possible, when state is SOCK_CLOSE_WAIT.
+    if ((tmpSn_SR == SOCK_ESTABLISHED) || (tmpSn_SR == SOCK_CLOSE_WAIT)) {
         return true;
     }
     return false;
@@ -146,7 +154,7 @@ void WIZnet_Chip::reset()
 #endif
 
     reg_wr_mac(SHAR, mac);
-    
+
     // set RX and TX buffer size
     for (int socket = 0; socket < MAX_SOCK_NUM; socket++) {
         sreg<uint8_t>(socket, Sn_RXBUF_SIZE, 2);
@@ -222,13 +230,33 @@ int WIZnet_Chip::send(int socket, const char * str, int len)
     spi_write(ptr, cntl_byte, (uint8_t*)str, len);
     sreg<uint16_t>(socket, Sn_TX_WR, ptr + len);
     scmd(socket, SEND);
-    
-    while ((sreg<uint8_t>(socket, Sn_IR) & INT_SEND_OK) != INT_SEND_OK) {
-        if (sreg<uint8_t>(socket, Sn_SR) == CLOSED) {
-            close(socket);
-            return 0;
+    uint8_t tmp_Sn_IR;
+    while (( (tmp_Sn_IR = sreg<uint8_t>(socket, Sn_IR)) & INT_SEND_OK) != INT_SEND_OK) {
+        // @Jul.10, 2014 fix contant name, and udp sendto function.
+        switch (sreg<uint8_t>(socket, Sn_SR)) {
+            case SOCK_CLOSED :
+                close(socket);
+                return 0;
+                //break;
+            case SOCK_UDP :
+                // ARP timeout is possible.
+                if ((tmp_Sn_IR & INT_TIMEOUT) == INT_TIMEOUT) {
+                    sreg<uint8_t>(socket, Sn_IR, INT_TIMEOUT);
+                    return 0;
+                }
+                break;
+            default :
+                break;
         }
     }
+    /*
+        while ((sreg<uint8_t>(socket, Sn_IR) & INT_SEND_OK) != INT_SEND_OK) {
+            if (sreg<uint8_t>(socket, Sn_SR) == CLOSED) {
+                close(socket);
+                return 0;
+            }
+        }
+    */
     sreg<uint8_t>(socket, Sn_IR, INT_SEND_OK);
 
     return len;
@@ -291,7 +319,7 @@ void WIZnet_Chip::spi_write(uint16_t addr, uint8_t cb, const uint8_t *buf, uint1
         }
     }
     debug("\r\n");
-#endif    
+#endif
 }
 
 void WIZnet_Chip::spi_read(uint16_t addr, uint8_t cb, uint8_t *buf, uint16_t len)
@@ -318,7 +346,7 @@ void WIZnet_Chip::spi_read(uint16_t addr, uint8_t cb, uint8_t *buf, uint16_t len
     if ((addr&0xf0ff)==0x4026 || (addr&0xf0ff)==0x4003) {
         wait_ms(200);
     }
-#endif    
+#endif
 }
 
 uint32_t str_to_ip(const char* str)
@@ -343,7 +371,7 @@ void printfBytes(char* str, uint8_t* buf, int len)
     for(int i = 0; i < len; i++) {
         printf(" %02x", buf[i]);
     }
-    printf("\n");  
+    printf("\n");
 }
 
 void printHex(uint8_t* buf, int len)
