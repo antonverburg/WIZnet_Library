@@ -126,11 +126,6 @@ bool WIZnet_Chip::disconnect()
 
 bool WIZnet_Chip::is_connected(int socket)
 {
-    /*
-        if (sreg<uint8_t>(socket, Sn_SR) == SOCK_ESTABLISHED) {
-            return true;
-        }
-    */
     uint8_t tmpSn_SR;
     tmpSn_SR = sreg<uint8_t>(socket, Sn_SR);
     // packet sending is possible, when state is SOCK_CLOSE_WAIT.
@@ -140,6 +135,17 @@ bool WIZnet_Chip::is_connected(int socket)
     return false;
 }
 
+
+bool WIZnet_Chip::is_fin_received(int socket)
+{
+    uint8_t tmpSn_SR;
+    tmpSn_SR = sreg<uint8_t>(socket, Sn_SR);
+    // packet sending is possible, when state is SOCK_CLOSE_WAIT.
+    if (tmpSn_SR == SOCK_CLOSE_WAIT) {
+        return true;
+    }
+    return false;
+}
 // Reset the chip & set the buffer
 void WIZnet_Chip::reset()
 {

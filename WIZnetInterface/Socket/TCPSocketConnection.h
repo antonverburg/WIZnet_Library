@@ -45,6 +45,10 @@ public:
     */
     bool is_connected(void);
     
+    /** Check if FIN signal received.
+    \return true if received, false otherwise.
+    */
+    bool is_fin_received(void);
     /** Send data to the remote host.
     \param data The buffer to send to the host.
     \param length The length of the buffer to send.

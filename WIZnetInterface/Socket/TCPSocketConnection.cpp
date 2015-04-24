@@ -44,6 +44,12 @@ bool TCPSocketConnection::is_connected(void)
     return eth->is_connected(_sock_fd);
 }
 
+
+bool TCPSocketConnection::is_fin_received(void)
+{
+    return eth->is_fin_received(_sock_fd);
+}
+
 int TCPSocketConnection::send(char* data, int length)
 {
     int size = eth->wait_writeable(_sock_fd, _blocking ? -1 : _timeout);

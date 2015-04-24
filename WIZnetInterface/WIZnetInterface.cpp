@@ -114,7 +114,7 @@ int WIZnetInterface::IPrenew(int timeout_ms)
     if (err == (-1)) {
         return -1;
     }
-//    printf("Connected, IP: %d.%d.%d.%d\n", dhcp.yiaddr[0], dhcp.yiaddr[1], dhcp.yiaddr[2], dhcp.yiaddr[3]);
+   // printf("Connected, IP: %d.%d.%d.%d\n", dhcp.yiaddr[0], dhcp.yiaddr[1], dhcp.yiaddr[2], dhcp.yiaddr[3]);
     ip      = (dhcp.yiaddr[0] <<24) | (dhcp.yiaddr[1] <<16) | (dhcp.yiaddr[2] <<8) | dhcp.yiaddr[3];
     gateway = (dhcp.gateway[0]<<24) | (dhcp.gateway[1]<<16) | (dhcp.gateway[2]<<8) | dhcp.gateway[3];
     netmask = (dhcp.netmask[0]<<24) | (dhcp.netmask[1]<<16) | (dhcp.netmask[2]<<8) | dhcp.netmask[3];
