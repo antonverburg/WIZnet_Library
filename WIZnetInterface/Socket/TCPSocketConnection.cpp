@@ -15,10 +15,16 @@
  * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 #include "TCPSocketConnection.h"
+#include <cstring>
 
-TCPSocketConnection::TCPSocketConnection()
+using std::memset;
+using std::memcpy;
+
+// not a big code.
+// refer from EthernetInterface by mbed official driver
+TCPSocketConnection::TCPSocketConnection() :
+    _is_connected(false)
 {
 }
 
@@ -36,12 +42,17 @@ int TCPSocketConnection::connect(const char* host, const int port)
     if (!eth->connect(_sock_fd, get_address(), port)) {
         return -1;
     }
+    set_blocking(false);
+    // add code refer from EthernetInterface.
+    _is_connected = true;
     return 0;
 }
 
 bool TCPSocketConnection::is_connected(void)
 {
-    return eth->is_connected(_sock_fd);
+    // force update recent state.
+    _is_connected = eth->is_connected(_sock_fd);
+    return _is_connected;
 }
 
 
@@ -52,6 +63,10 @@ bool TCPSocketConnection::is_fin_received(void)
 
 int TCPSocketConnection::send(char* data, int length)
 {
+    // add to cover exception.
+    if ((_sock_fd < 0) || !_is_connected)
+        return -1;
+
     int size = eth->wait_writeable(_sock_fd, _blocking ? -1 : _timeout);
     if (size < 0) {
         return -1;
@@ -65,6 +80,7 @@ int TCPSocketConnection::send(char* data, int length)
 // -1 if unsuccessful, else number of bytes written
 int TCPSocketConnection::send_all(char* data, int length)
 {
+
     int writtenLen = 0;
     while (writtenLen < length) {
         int size = eth->wait_writeable(_sock_fd, _blocking ? -1 : _timeout);
@@ -86,6 +102,10 @@ int TCPSocketConnection::send_all(char* data, int length)
 // -1 if unsuccessful, else number of bytes received
 int TCPSocketConnection::receive(char* data, int length)
 {
+    // add to cover exception.
+    if ((_sock_fd < 0) || !_is_connected)
+        return -1;
+
     int size = eth->wait_readable(_sock_fd, _blocking ? -1 : _timeout);
     if (size < 0) {
         return -1;

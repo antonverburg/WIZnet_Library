@@ -76,16 +76,21 @@ int TCPSocketServer::accept(TCPSocketConnection& connection)
     uint16_t port = eth->sreg<uint16_t>(_sock_fd, Sn_DPORT);
     // change this server socket to connection socket.
     connection._sock_fd = _sock_fd;
+    connection._is_connected = true;
     connection.set_address(host, port);
 
     // and then, for the next connection, server socket should be assigned new one.
     _sock_fd = -1; // want to assign new available _sock_fd.
     if(bind(listen_port) < 0) {
-        error("No more socket for listening");
+        // modified by Patrick Pollet
+        error("No more socket for listening, bind error");
+        return -1;
     } else {
         //return -1;
         if(listen(1) < 0) {
-            error("No more socket for listening");
+            // modified by Patrick Pollet
+            error("No more socket for listening, listen error");
+            return -1;
         }
     }
 

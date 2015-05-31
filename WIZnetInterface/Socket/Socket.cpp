@@ -15,26 +15,35 @@
  * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
- 
+
 #include "Socket.h"
 
-Socket::Socket() : _sock_fd(-1),_blocking(true), _timeout(1500) {
+Socket::Socket() : _sock_fd(-1),_blocking(true), _timeout(1500)
+{
     eth = WIZnet_Chip::getInstance();
     if (eth == NULL) {
         error("Socket constructor error: no W5500 instance available!\r\n");
-    }       
+    }
 }
 
-void Socket::set_blocking(bool blocking, unsigned int timeout) {
+void Socket::set_blocking(bool blocking, unsigned int timeout)
+{
     _blocking = blocking;
     _timeout = timeout;
 }
 
-int Socket::close() {
-    return (eth->close(_sock_fd)) ? 0 : -1;
+int Socket::close()
+{
+    // add this code refer from EthernetInterface.
+    // update by Patrick Pollet
+    int res;
+    res = eth->close(_sock_fd);
+    _sock_fd = -1;
+    return (res)? 0: -1;
 }
 
-Socket::~Socket() {
+Socket::~Socket()
+{
     close(); //Don't want to leak
 }
 

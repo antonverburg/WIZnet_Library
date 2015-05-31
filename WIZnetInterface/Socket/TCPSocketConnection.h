@@ -76,6 +76,9 @@ public:
     \return the number of received bytes on success (>=0) or -1 on failure
     */
     int receive_all(char* data, int length);
+
+private:
+    bool _is_connected;    
 };
 
 #endif
