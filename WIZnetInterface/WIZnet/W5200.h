@@ -147,6 +147,13 @@ public:
     */
     bool is_connected(int socket);
 
+	/*
+    * Check if FIN received.
+    *
+    * @returns true if successful
+    */
+    bool is_fin_received(int socket);
+    
     /*
     * Close a tcp connection
     *

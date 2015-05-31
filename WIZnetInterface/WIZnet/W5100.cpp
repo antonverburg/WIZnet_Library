@@ -140,6 +140,18 @@ bool WIZnet_Chip::is_connected(int socket)
     return false;
 }
 
+
+bool WIZnet_Chip::is_fin_received(int socket)
+{
+    uint8_t tmpSn_SR;
+    tmpSn_SR = sreg<uint8_t>(socket, Sn_SR);
+    // packet sending is possible, when state is SOCK_CLOSE_WAIT.
+    if (tmpSn_SR == SOCK_CLOSE_WAIT) {
+        return true;
+    }
+    return false;
+}
+
 void WIZnet_Chip::reset()
 {
     reset_pin = 1;
@@ -202,7 +214,14 @@ int WIZnet_Chip::wait_writeable(int socket, int wait_time_ms, int req_size)
     t.reset();
     t.start();
     while(1) {
-        int size = sreg<uint16_t>(socket, Sn_TX_FSR);
+        //int size = sreg<uint16_t>(socket, Sn_TX_FSR);
+        // during the reading Sn_TX_FSR, it has the possible change of this register.
+        // so read twice and get same value then use size information.
+        int size, size2;
+        do {
+            size = sreg<uint16_t>(socket, Sn_TX_FSR);
+            size2 = sreg<uint16_t>(socket, Sn_TX_FSR);
+        } while (size != size2);
         if (size > req_size) {
             return size;
         }
