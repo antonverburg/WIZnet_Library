@@ -157,7 +157,7 @@ void WIZnet_Chip::reset()
     reset_pin = 0;
     wait_us(2); // 2us
     reset_pin = 1;
-    thread_sleep_for(150); // 150ms
+    wait_us(150000); // 150ms
     
     reg_wr<uint8_t>(MR, 1<<7);
     

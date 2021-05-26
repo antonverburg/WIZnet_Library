@@ -151,9 +151,9 @@ void WIZnet_Chip::reset()
 {
     reset_pin = 1;
     reset_pin = 0;
-    thread_sleep_for(500); // 500us (w5500)
+    wait_us(500); // 500us (w5500)
     reset_pin = 1;
-    thread_sleep_for(400); // 400ms (w5500)
+    wait_us(400000); // 400ms (w5500)
 
 #if defined(USE_WIZ550IO_MAC)
     reg_rd_mac(SHAR, mac); // read the MAC address inside the module
