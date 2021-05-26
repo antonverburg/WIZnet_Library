@@ -176,6 +176,7 @@ int DHCPClient::setup(int timeout_ms)
     int err = 0;
     int seq = 0;
     int send_size;
+	int interval_ctr=0;
     while(!exit_flag) {
         switch(seq) {
             case 0:
@@ -185,13 +186,12 @@ int DHCPClient::setup(int timeout_ms)
             case 1:
                 send_size = discover();
                 m_udp->sendTo(m_server, (char*)m_buf, send_size);
-                m_interval.reset();
-                m_interval.start();
+               
                 seq++;
                 break;
             case 2:
                 callback();
-                if (m_interval.read_ms() > interval_ms) {
+                if (interval_ctr++ > interval_ms) {
                     DBG("m_retry: %d\n", m_retry);
                     if (++m_retry >= (timeout_ms/interval_ms)) {
                         err = -1;
@@ -199,10 +199,12 @@ int DHCPClient::setup(int timeout_ms)
                     }
                     seq--;
                 }
+				else
+					wait_us(1000); // Wait a ms
                 break;
         }
     }
-    DBG("m_retry: %d, m_interval: %d\n", m_retry, m_interval.read_ms());
+    DBG("m_retry: %d, interval_ctr: %d\n", m_retry, interval_ctr);
     delete m_udp;
     return err;
 }

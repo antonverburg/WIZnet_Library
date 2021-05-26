@@ -33,9 +33,13 @@ void DNSClient::callback()
     Endpoint host;
     int len = m_udp->receiveFrom(host, (char*)buf, sizeof(buf));
     if (len < 0) {
+		wait_us(1000);
+		ms_ctr++;
         return;
     }
     if (memcmp(buf+0, m_id, 2) != 0) { //verify
+		wait_us(1000);
+		ms_ctr++;
         return;
     }
     int rcode = response(buf, len);
@@ -122,8 +126,7 @@ void DNSClient::resolve(const char* hostname) {
     printHex(buf, size);
 #endif
     m_udp->sendTo(server, (char*)buf, size);
-    m_interval.reset();
-    m_interval.start();
+    ms_ctr = 0;
 }
 
 void DNSClient::poll() {
@@ -137,18 +140,18 @@ void DNSClient::poll() {
             resolve(m_hostname);
             m_state = MYNETDNS_PROCESSING;
             break;
-        case MYNETDNS_PROCESSING: 
+        case MYNETDNS_PROCESSING:
             break;
         case MYNETDNS_NOTFOUND: 
             break;
         case MYNETDNS_ERROR: 
             break;
         case MYNETDNS_OK:
-            DBG2("m_retry=%d, m_interval=%d\n", m_retry, m_interval.read_ms());
+            DBG2("m_retry=%d, ms_ctr=%d\n", m_retry, ms_ctr);
             break;
     }
-    if (m_interval.read_ms() > 1000) {
-        m_interval.stop();
+    if (ms_ctr > 1000) {
+		
         DBG2("timeout m_retry=%d\n", m_retry);
         if (++m_retry >= 2) {
             m_state = MYNETDNS_ERROR;

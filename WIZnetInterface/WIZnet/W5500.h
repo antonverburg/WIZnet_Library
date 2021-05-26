@@ -206,7 +206,7 @@ public:
     void reg_wr(uint16_t addr, uint8_t cb, T data) {
         uint8_t buf[sizeof(T)];
         *reinterpret_cast<T*>(buf) = data;
-        for(int i = 0; i < sizeof(buf)/2; i++) { //  Little Endian to Big Endian
+        for(uint i = 0; i < sizeof(buf)/2; i++) { //  Little Endian to Big Endian
             uint8_t t = buf[i];
             buf[i] = buf[sizeof(buf)-1-i];
             buf[sizeof(buf)-1-i] = t;
@@ -223,7 +223,7 @@ public:
     T reg_rd(uint16_t addr, uint8_t cb) {
         uint8_t buf[sizeof(T)];
         spi_read(addr, cb, buf, sizeof(buf));
-        for(int i = 0; i < sizeof(buf)/2; i++) { // Big Endian to Little Endian
+        for(uint i = 0; i < sizeof(buf)/2; i++) { // Big Endian to Little Endian
             uint8_t t = buf[i];
             buf[i] = buf[sizeof(buf)-1-i];
             buf[sizeof(buf)-1-i] = t;

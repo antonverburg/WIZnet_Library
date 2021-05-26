@@ -59,16 +59,15 @@ int TCPSocketServer::accept(TCPSocketConnection& connection)
     if (_sock_fd < 0) {
         return -1;
     }
-    Timer t;
-    t.reset();
-    t.start();
+    int ctr=0;
     while(1) {
-        if (t.read_ms() > _timeout && _blocking == false) {
-            return -1;
-        }
         if (eth->sreg<uint8_t>(_sock_fd, Sn_SR) == SOCK_ESTABLISHED) {
             break;
         }
+		if (_blocking == false && ctr++ > (_timeout*10) ) { 
+            return -1;
+        }
+		wait_us(100);
     }
     uint32_t ip = eth->sreg<uint32_t>(_sock_fd, Sn_DIPR);
     char host[16];

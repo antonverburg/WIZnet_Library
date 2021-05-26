@@ -21,6 +21,7 @@
 #include "wiznet.h"
 #include "DNSClient.h"
 
+
 #ifdef USE_W5500
 //Debug is disabled by default
 #if 0
@@ -91,13 +92,12 @@ bool WIZnet_Chip::connect(int socket, const char * host, int port, int timeout_m
     sreg<uint16_t>(socket, Sn_DPORT, port);
     sreg<uint16_t>(socket, Sn_PORT, new_port());
     scmd(socket, CONNECT);
-    Timer t;
-    t.reset();
-    t.start();
+	int ctr=0;
     while(!is_connected(socket)) {
-        if (t.read_ms() > timeout_ms) {
+        if (ctr++ > (timeout_ms*10)) {
             return false;
         }
+		wait_us(100);
     }
     return true;
 }
@@ -106,7 +106,7 @@ bool WIZnet_Chip::gethostbyname(const char* host, uint32_t* ip)
 {
     uint32_t addr = str_to_ip(host);
     char buf[17];
-    snprintf(buf, sizeof(buf), "%d.%d.%d.%d", (addr>>24)&0xff, (addr>>16)&0xff, (addr>>8)&0xff, addr&0xff);
+    snprintf(buf, sizeof(buf), "%ld.%ld.%ld.%ld", (addr>>24)&0xff, (addr>>16)&0xff, (addr>>8)&0xff, addr&0xff);
     if (strcmp(buf, host) == 0) {
         *ip = addr;
         return true;
@@ -151,9 +151,9 @@ void WIZnet_Chip::reset()
 {
     reset_pin = 1;
     reset_pin = 0;
-    wait_us(500); // 500us (w5500)
+    thread_sleep_for(500); // 500us (w5500)
     reset_pin = 1;
-    wait_ms(400); // 400ms (w5500)
+    thread_sleep_for(400); // 400ms (w5500)
 
 #if defined(USE_WIZ550IO_MAC)
     reg_rd_mac(SHAR, mac); // read the MAC address inside the module
@@ -191,9 +191,7 @@ int WIZnet_Chip::wait_readable(int socket, int wait_time_ms, int req_size)
     if (socket < 0) {
         return -1;
     }
-    Timer t;
-    t.reset();
-    t.start();
+    int ctr=0;
     while(1) {
         //int size = sreg<uint16_t>(socket, Sn_RX_RSR);
         // during the reading Sn_RX_RXR, it has the possible change of this register.
@@ -207,9 +205,10 @@ int WIZnet_Chip::wait_readable(int socket, int wait_time_ms, int req_size)
         if (size > req_size) {
             return size;
         }
-        if (wait_time_ms != (-1) && t.read_ms() > wait_time_ms) {
+        if (wait_time_ms != (-1)  && ctr++ > (wait_time_ms*10) ) { 
             break;
         }
+		wait_us(100);
     }
     return -1;
 }
@@ -219,9 +218,7 @@ int WIZnet_Chip::wait_writeable(int socket, int wait_time_ms, int req_size)
     if (socket < 0) {
         return -1;
     }
-    Timer t;
-    t.reset();
-    t.start();
+    int ctr =0;
     while(1) {
         //int size = sreg<uint16_t>(socket, Sn_TX_FSR);
         // during the reading Sn_TX_FSR, it has the possible change of this register.
@@ -235,9 +232,10 @@ int WIZnet_Chip::wait_writeable(int socket, int wait_time_ms, int req_size)
         if (size > req_size) {
             return size;
         }
-        if (wait_time_ms != (-1) && t.read_ms() > wait_time_ms) {
+        if (wait_time_ms != (-1)  && ctr++ > (wait_time_ms*10) ) { 
             break;
         }
+		wait_us(100);
     }
     return -1;
 }
