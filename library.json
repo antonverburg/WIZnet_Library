@@ -3,6 +3,7 @@
         "name": "WIZnet library (clone by Anton Verburg)",
         "url": "https://github.com/antonverburg/WIZnet_Library"
     },
+	"version": "0",
     "description": "This is WIZnet Ethernet Interface using Hardware TCP/IP chip, W5500, W5200 and W5100. One of them can be selected by enabling it in wiznet.h. Special for this clone: Timer() functions replaced by normal wait functions to keep timers free for other tasks",
     "examples": [
         "https://os.mbed.com/teams/IPN-ESIME-ZACATENCO/code/Embedded_web/",
@@ -30,5 +31,13 @@
         "type": "git",
         "url": "https://github.com/antonverburg/WIZnet_Library"
     },
-    "version": "0"
+	"build": {
+		"flags": [
+			"-I WIZnetInterface",
+			"-I WIZnetInterface/WIZnet",
+			"-I WIZnetInterface/DHCPClient",
+			"-I WIZnetInterface/DNSClient",
+			"-I WIZnetInterface/Socket"
+		]
+	}
 }
