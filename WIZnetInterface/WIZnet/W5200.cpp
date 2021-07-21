@@ -135,6 +135,12 @@ bool WIZnet_Chip::disconnect()
     return true;
 }
 
+bool WIZnet_Chip::is_cable_connected()
+{
+	// W5100 can't read link status
+    return false;
+}
+
 bool WIZnet_Chip::is_connected(int socket)
 {
     if (sreg<uint8_t>(socket, Sn_SR) == SOCK_ESTABLISHED) {

@@ -124,6 +124,13 @@ bool WIZnet_Chip::disconnect()
     return true;
 }
 
+bool WIZnet_Chip::is_cable_connected()
+{
+	uint8_t status =0;
+	spi_read( PHYCFGR, 0x00, &status, 1);
+	return ((status & BIT_LINKED) != BIT_LINKED);
+}
+
 bool WIZnet_Chip::is_connected(int socket)
 {
     uint8_t tmpSn_SR;

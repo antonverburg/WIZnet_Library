@@ -70,7 +70,10 @@ enum Status {
 #define SUBR      0x0005
 #define SHAR      0x0009
 #define SIPR      0x000f
+#define PHYCFGR	  0x002e
 #define PHYSTATUS 0x0035
+
+#define BIT_LINKED (0x1<<0)
 
 // W5500 socket register
 #define Sn_MR         0x0000
@@ -86,6 +89,9 @@ enum Status {
 #define Sn_TX_WR      0x0024
 #define Sn_RX_RSR     0x0026
 #define Sn_RX_RD      0x0028
+
+
+
 
 class WIZnet_Chip {
 public:
@@ -138,6 +144,13 @@ public:
     int wait_readable(int socket, int wait_time_ms, int req_size = 0);
 
     int wait_writeable(int socket, int wait_time_ms, int req_size = 0);
+
+	/*
+    * Check if a cable is plugged in
+    *
+    * @returns true if successful
+    */
+    bool is_cable_connected();
 
     /*
     * Check if a tcp link is active
